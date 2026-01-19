@@ -3,63 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>モフ進化DX -THE REAL-</title>
+    <title>モフ進化DX -Level Up-</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap');
         :root { --main: #5d4037; --sub: #efebe9; --pink: #ff80ab; --orange: #ffb74d; --blue: #4fc3f7; --green: #81c784; --purple: #b39ddb; }
         body { margin: 0; height: 100vh; overflow: hidden; background: #fffdf0; font-family: 'Zen Maru Gothic', sans-serif; touch-action: none; user-select: none; }
 
-        /* --- UIレイヤー --- */
+        /* --- UIレイヤー（維持） --- */
         .status-canvas { position: fixed; top: 10px; left: 10px; z-index: 1000; width: 180px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 20px; border: 3px solid var(--sub); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         .bar-wrap { margin-bottom: 6px; }
         .bar-info { display: flex; justify-content: space-between; font-size: 10px; font-weight: 900; margin-bottom: 2px; }
         .bar-bg { width: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 50%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
+        .bar-fill { height: 100%; width: 0%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .coin-display { position: fixed; top: 15px; right: 90px; background: white; padding: 5px 15px; border-radius: 20px; border: 3px solid gold; font-weight: 900; color: #f57c00; z-index: 1000; }
-        .lv-badge { position: fixed; top: 10px; right: 10px; width: 65px; height: 65px; background: white; border: 4px solid #ff5252; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .lv-badge { position: fixed; top: 10px; right: 10px; width: 65px; height: 65px; background: white; border: 4px solid #ff5252; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); animation: lvPulse 2s infinite; }
+        @keyframes lvPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* --- モフ本体（究極アニメ） --- */
-        #mofu-world { position: absolute; inset: 0; }
-        #mofu-container { position: absolute; width: 180px; height: 170px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 100; transition: left 0.8s ease-out, top 0.8s ease-out; }
-        .mofu-body { width: 100%; height: 100%; background: #fff; border-radius: 50% 50% 45% 45%; border: 7px solid var(--sub); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 15px 30px rgba(0,0,0,0.1); animation: float 4s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-15px) scale(1.02, 0.98); } }
+        /* --- 風とモフ（維持＆強化） --- */
+        .wind-particle { position: fixed; pointer-events: none; z-index: 1; background: rgba(255,255,255,0.6); border-radius: 10px; animation: windMove linear forwards; }
+        @keyframes windMove { 0% { transform: translate(-100px, 0); opacity: 0; } 100% { transform: translate(calc(100vw + 100px), 50px); opacity: 0; } }
+
+        #mofu-container { position: absolute; width: 180px; height: 170px; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 100; transition: left 2s ease-in-out, top 2s ease-in-out; }
+        .mofu-body { width: 100%; height: 100%; background: #fff; border-radius: 50% 50% 45% 45%; border: 7px solid var(--sub); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 15px 30px rgba(0,0,0,0.1); animation: floatAndWind 6s ease-in-out infinite; }
+        @keyframes floatAndWind { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(2deg) translateY(-10px); } 50% { transform: rotate(-1deg) translateY(-15px); } 75% { transform: rotate(1deg) translateY(-8px); } }
         
+        /* リアクション用アニメ */
+        .jump { animation: jumpAnim 0.5s ease-out !important; }
+        @keyframes jumpAnim { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-50px) scale(1.1, 0.9); } }
+        .spin { animation: spinAnim 0.6s linear !important; }
+        @keyframes spinAnim { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #speech { position: absolute; top: -100px; background: white; border: 3px solid var(--main); padding: 10px 15px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; white-space: nowrap; pointer-events: none; z-index: 200; }
         .face { font-size: 55px; transition: 0.2s; }
         .equip { position: absolute; font-size: 60px; pointer-events: none; z-index: 110; transition: 0.1s; }
-        
-        /* 吹き出し */
-        #speech { position: absolute; top: -100px; background: white; border: 3px solid var(--main); padding: 10px 15px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; white-space: nowrap; pointer-events: none; }
-        #speech::after { content: ''; position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--main); }
 
-        /* --- メニュー・シート --- */
+        /* --- メニュー系 --- */
         .menu-bar { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 8px; z-index: 2000; }
         .m-btn { padding: 12px 18px; border-radius: 20px; border: none; background: white; border-bottom: 5px solid #ddd; font-weight: 900; cursor: pointer; transition: 0.1s; font-size: 14px; }
         .m-btn:active { transform: translateY(4px); border-bottom-width: 0; }
-        
-        .sheet { position: fixed; bottom: -110%; left: 0; width: 100%; height: 85%; background: white; border-radius: 35px 35px 0 0; z-index: 3000; transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); padding: 30px; box-sizing: border-box; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+        .m-btn.locked { background: #ccc; color: #888; border-bottom-color: #aaa; cursor: not-allowed; }
+
+        .sheet { position: fixed; bottom: -110%; left: 0; width: 100%; height: 85%; background: white; border-radius: 35px 35px 0 0; z-index: 3000; transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); padding: 30px; box-sizing: border-box; overflow-y: auto; }
         .sheet.open { bottom: 0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .item-card { background: #f9f9f9; padding: 15px; border-radius: 20px; text-align: center; border: 2px solid #eee; }
+        .card { background: #f9f9f9; padding: 10px; border-radius: 15px; text-align: center; border: 2px solid #eee; }
 
-        /* --- バイトミニゲーム画面 --- */
         #game-screen { position: fixed; inset: 0; background: #222; z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        #game-canvas { background: #333; border: 4px solid #555; border-radius: 20px; touch-action: none; }
-
-        /* エフェクト */
-        .fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
-        .particle { position: absolute; animation: pUp 1s forwards; font-size: 30px; }
-        @keyframes pUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
+        #game-canvas { background: #333; border: 4px solid #555; border-radius: 20px; }
     </style>
 </head>
 <body>
 
 <div id="start-screen" style="position:fixed; inset:0; background:var(--orange); z-index:9000; display:none; flex-direction:column; align-items:center; justify-content:center; color:white;">
-    <h1 style="font-size:40px; text-shadow: 0 4px #d84315;">モフ進化DX</h1>
-    <p>きみだけのパートナーを育てよう！</p>
-    <input id="un-in" placeholder="きみのなまえ" style="padding:15px; border-radius:15px; border:none; width:70%; margin:10px; font-size:18px; text-align:center;">
-    <input id="pn-in" placeholder="モフのなまえ" style="padding:15px; border-radius:15px; border:none; width:70%; margin:10px; font-size:18px; text-align:center;">
-    <button class="m-btn" style="width:70%; background:var(--main); color:white; border:none; font-size:20px;" onclick="init()">ぼうけんをはじめる！</button>
+    <h1>✨モフ進化DX✨</h1>
+    <input id="un-in" placeholder="きみのなまえ" style="padding:15px; border-radius:15px; width:70%; margin:10px; text-align:center;">
+    <input id="pn-in" placeholder="モフのなまえ" style="padding:15px; border-radius:15px; width:70%; margin:10px; text-align:center;">
+    <button class="m-btn" onclick="init()">はじめる！</button>
 </div>
 
 <div class="ui-layer">
@@ -71,7 +70,7 @@
         <div class="bar-wrap"><div class="bar-info"><span>🎓 けいけん</span><span id="v-exp">0%</span></div><div class="bar-bg"><div id="b-exp" class="bar-fill" style="background:var(--purple);"></div></div></div>
     </div>
     <div class="coin-display">💰 <span id="coin-val">0</span></div>
-    <div class="lv-badge"><span style="font-size:10px;">Lv</span><div id="lv-val" style="font-size:28px; font-weight:900;">1</div></div>
+    <div class="lv-badge"><div id="lv-val" style="font-size:28px; font-weight:900;">1</div></div>
 </div>
 
 <div id="mofu-world">
@@ -93,25 +92,21 @@
     <button class="m-btn" onclick="openS('work')">⚒️ バイト</button>
     <button class="m-btn" onclick="openS('shop')">🛒 ショップ</button>
     <button class="m-btn" onclick="openS('equip')">🧥 そうび</button>
-    <button class="m-btn" onclick="reset()" style="background:#ffccbc;">🔄</button>
 </div>
 
-<div id="sheet-care" class="sheet"><h2>🍗 お世話をする</h2><hr><div id="list-care" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
-<div id="sheet-work" class="sheet"><h2>⚒️ バイトに挑戦</h2><p>ミニゲームをクリアして給料をもらおう！</p><hr><div id="list-work" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
-<div id="sheet-shop" class="sheet"><h2>🛒 モフショップ</h2><hr><div id="list-shop" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
-<div id="sheet-equip" class="sheet"><h2>🧥 クローゼット</h2><p>アイテムを選んで位置を調整！</p><div id="pos-ctrl" style="display:none; text-align:center; background:#eee; padding:10px; border-radius:15px; margin-bottom:10px;">調整中: <span id="cur-slot"></span><br><button class="m-btn" onclick="moveEq(0,-5)">⬆</button><br><button class="m-btn" onclick="moveEq(-5,0)">⬅</button><button class="m-btn" onclick="moveEq(5,0)">➡</button><br><button class="m-btn" onclick="moveEq(0,5)">⬇</button></div><hr><div id="list-equip" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
+<div id="sheet-care" class="sheet"><h2>🍖 お世話メニュー</h2><hr><div id="list-care" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
+<div id="sheet-work" class="sheet"><h2>⚒️ バイト</h2><hr><div id="list-work" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
+<div id="sheet-shop" class="sheet"><h2>🛒 ショップ</h2><hr><div id="list-shop" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
+<div id="sheet-equip" class="sheet"><h2>🧥 そうび</h2><div id="pos-ctrl" style="display:none; text-align:center; background:#eee; padding:10px; border-radius:15px; margin-bottom:10px;">調整中: <span id="cur-slot"></span><br><button class="m-btn" onclick="moveEq(0,-5)">⬆</button><br><button class="m-btn" onclick="moveEq(-5,0)">⬅</button><button class="m-btn" onclick="moveEq(5,0)">➡</button><br><button class="m-btn" onclick="moveEq(0,5)">⬇</button></div><hr><div id="list-equip" class="grid"></div><button class="m-btn" style="width:100%; margin-top:20px;" onclick="closeS()">閉じる</button></div>
 
 <div id="game-screen">
     <h2 id="game-title">バイト中！</h2>
     <canvas id="game-canvas" width="300" height="400"></canvas>
-    <p id="game-info">タップでジャンプして障害物を避けろ！</p>
     <button class="m-btn" onclick="quitGame()">やめる</button>
 </div>
 
-<div id="fx-layer" class="fx-layer"></div>
-
 <script>
-    let d = JSON.parse(localStorage.getItem('mofu_dx_real')) || {
+    let d = JSON.parse(localStorage.getItem('mofu_dx_lv')) || {
         un:"", pn:"", cn:100, lvl:1, exp:0,
         kizuna:50, food:50, clean:50, hp:100,
         items:[], eq:{head:"", face:"", handR:"", handL:""},
@@ -128,7 +123,7 @@
     function init() {
         const u = document.getElementById('un-in').value;
         const p = document.getElementById('pn-in').value;
-        if(!u || !p) return alert("名前を入力してね！");
+        if(!u || !p) return;
         d.un = u; d.pn = p;
         document.getElementById('start-screen').style.display = 'none';
         start();
@@ -137,8 +132,21 @@
     function start() {
         document.getElementById('mofu-name-label').innerText = d.pn;
         update();
-        setInterval(autoLogic, 5000);
+        setInterval(autoLogic, 3000);
+        setInterval(spawnWind, 2000);
         initPetting();
+    }
+
+    function spawnWind() {
+        if(isGame) return;
+        const w = document.createElement('div');
+        w.className = 'wind-particle';
+        w.style.width = (20 + Math.random() * 80) + 'px';
+        w.style.height = '3px';
+        w.style.top = Math.random() * 100 + 'vh';
+        w.style.animationDuration = (2 + Math.random() * 2) + 's';
+        document.body.appendChild(w);
+        setTimeout(() => w.remove(), 4000);
     }
 
     function update() {
@@ -147,28 +155,23 @@
             document.getElementById('v-'+id).innerText = Math.floor(val) + '%';
         };
         setB('kizuna', d.kizuna); setB('food', d.food); setB('clean', d.clean); setB('hp', d.hp);
-        setB('exp', (d.exp/(d.lvl*100))*100);
-        
+        setB('exp', (d.exp / (d.lvl * 100)) * 100);
         document.getElementById('coin-val').innerText = d.cn;
         document.getElementById('lv-val').innerText = d.lvl;
-        
         for(let s in d.eq) {
             const e = document.getElementById('eq-'+s);
             e.innerText = d.eq[s];
             e.style.transform = `translate(calc(-50% + ${d.pos[s].x}px), calc(-50% + ${d.pos[s].y}px))`;
-            e.style.left = "50%"; e.style.top = "50%";
         }
-        
-        const face = document.getElementById('face');
-        if(d.hp < 20) face.innerText = "－⩊－";
-        else if(d.food < 20) face.innerText = "😵";
-        else if(d.kizuna > 80) face.innerText = "＾⩊＾";
-        else face.innerText = "・⩊・";
-
-        localStorage.setItem('mofu_dx_real', JSON.stringify(d));
+        localStorage.setItem('mofu_dx_lv', JSON.stringify(d));
     }
 
-    // --- しゃべる＆なでる ---
+    function playAnim(cls) {
+        const m = document.getElementById('mofu-body');
+        m.classList.add(cls);
+        setTimeout(() => m.classList.remove(cls), 600);
+    }
+
     function say(txt) {
         const s = document.getElementById('speech');
         s.innerText = txt.replace("{un}", d.un);
@@ -179,122 +182,67 @@
     function initPetting() {
         const m = document.getElementById('mofu-body');
         let isDown = false;
-        const pet = (e) => {
-            if(!isDown) return;
-            d.kizuna = Math.min(100, d.kizuna + 0.2);
-            if(Math.random() > 0.95) {
-                spawnFX("❤️", e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
-                say(Math.random() > 0.5 ? "{un}、もっと～！" : "えへへ、きもちいい！");
-            }
-            update();
-        };
-        m.onmousedown = () => { isDown = true; m.style.transform = "scale(0.9)"; };
-        window.onmouseup = () => { isDown = false; m.style.transform = ""; };
-        m.ontouchstart = () => { isDown = true; m.style.transform = "scale(0.9)"; };
-        window.ontouchend = () => { isDown = false; m.style.transform = ""; };
-        m.onmousemove = pet; m.ontouchmove = pet;
+        m.onmousedown = () => { isDown = true; playAnim('spin'); d.kizuna = Math.min(100, d.kizuna + 1); update(); say("えへへ！"); };
+        window.onmouseup = () => { isDown = false; };
+        m.ontouchstart = (e) => { isDown = true; playAnim('spin'); d.kizuna = Math.min(100, d.kizuna + 1); update(); say("{un}、なでなで！"); };
     }
 
-    function spawnFX(emoji, x, y) {
-        const f = document.createElement('div');
-        f.className = 'particle'; f.innerText = emoji;
-        f.style.left = x + 'px'; f.style.top = y + 'px';
-        document.getElementById('fx-layer').appendChild(f);
-        setTimeout(() => f.remove(), 1000);
-    }
-
-    // --- 自動ロジック ---
     function autoLogic() {
         if(isGame) return;
-        d.food = Math.max(0, d.food - 0.5);
-        d.clean = Math.max(0, d.clean - 0.3);
-        if(d.food < 10) say("{un}、おなかすいたよぉ...");
-        
-        // 歩く
+        d.food = Math.max(0, d.food - 0.1);
         const c = document.getElementById('mofu-container');
         c.style.left = (20 + Math.random() * 60) + "%";
         c.style.top = (30 + Math.random() * 40) + "%";
         update();
     }
 
-    // --- バイトミニゲーム (本気) ---
-    function startWork(type) {
-        closeS();
-        document.getElementById('game-screen').style.display = 'flex';
-        isGame = true;
-        
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        let playerY = 350, velocity = 0, score = 0, frames = 0, obstacles = [];
-        
-        const loop = () => {
-            if(!isGame) return;
-            ctx.clearRect(0,0,300,400);
-            
-            // プレイヤー(モフ)
-            velocity += 0.8; playerY += velocity;
-            if(playerY > 350) { playerY = 350; velocity = 0; }
-            ctx.font = "40px Arial"; ctx.fillText("☁️", 50, playerY);
-            
-            // 障害物
-            if(frames % 60 === 0) obstacles.push({x:300, y:350});
-            obstacles.forEach((o, i) => {
-                o.x -= 5;
-                ctx.fillText("🌵", o.x, o.y);
-                if(o.x < 80 && o.x > 20 && playerY > 310) { // 衝突
-                    endGame(score);
-                }
-                if(o.x < -50) { obstacles.splice(i, 1); score++; }
-            });
-            
-            ctx.fillStyle = "white"; ctx.font = "20px Arial"; ctx.fillText("給料: " + score*10 + "G", 10, 30);
-            frames++;
-            requestAnimationFrame(loop);
-        };
-        
-        canvas.onclick = () => { if(playerY > 300) velocity = -12; };
-        loop();
-    }
+    // --- お世話・ショップ（レベル制限つき） ---
+    function openS(id) {
+        const s = document.getElementById('sheet-'+id);
+        s.classList.add('open');
+        const list = document.getElementById('list-'+id);
+        list.innerHTML = "";
 
-    function endGame(score) {
-        isGame = false;
-        const pay = score * 10;
-        d.cn += pay; d.exp += score * 5; d.hp = Math.max(0, d.hp - 20);
-        document.getElementById('game-screen').style.display = 'none';
-        alert(`バイト終了！\n稼いだお金: ${pay}G\n経験値アップ！`);
-        checkLv(); update();
-    }
-
-    function quitGame() { isGame = false; document.getElementById('game-screen').style.display = 'none'; }
-
-    // --- その他機能 ---
-    function openS(id) { 
-        document.getElementById('sheet-'+id).classList.add('open'); 
-        const list = document.getElementById('list-'+id); list.innerHTML = "";
-        
         if(id === 'care') {
-            [{n:"🍙 おにぎり",c:0,f:20,s:"もぐもぐ！"},{n:"🍖 お肉",c:50,f:50,s:"うますぎる！"},{n:"🛀 お風呂",c:0,cl:100,s:"ピカピカだよ！"},{n:"💤 お昼寝",c:0,h:100,s:"おやすみ..."}].forEach(i => {
-                const b = document.createElement('div'); b.className="item-card";
-                b.innerHTML = `${i.n}<br>💰${i.c}G<br><button class="m-btn" onclick="doCare(${i.c},${i.f||0},${i.cl||0},${i.h||0},'${i.s}')">使う</button>`;
-                list.appendChild(b);
-            });
-        }
-        if(id === 'work') {
-            [{n:"🧹 掃除(簡単)",t:"tap"},{n:"配達(激ムズ)",t:"game"}].forEach(w => {
-                const b = document.createElement('div'); b.className="item-card";
-                b.innerHTML = `${w.n}<br><button class="m-btn" onclick="startWork()">開始</button>`;
+            const cares = [
+                {n:"🍙 おにぎり", l:1, f:20, e:10, a:'jump'},
+                {n:"🍖 特上肉", l:3, f:60, e:30, a:'spin'},
+                {n:"🎾 ボール遊び", l:2, k:20, e:20, a:'jump'},
+                {n:"📚 お勉強", l:4, e:80, h:-10, a:'spin'},
+                {n:"🛀 お風呂", l:1, cl:100, e:5, a:'jump'}
+            ];
+            cares.forEach(c => {
+                const b = document.createElement('div'); b.className = "card";
+                const isLocked = d.lvl < c.l;
+                b.innerHTML = `${c.n}<br>${isLocked ? '🔒Lv'+c.l : ''}<br><button class="m-btn ${isLocked?'locked':''}" onclick="doCare(${JSON.stringify(c)})">${isLocked?'ロック':'使う'}</button>`;
                 list.appendChild(b);
             });
         }
         if(id === 'shop') {
-            [{n:"👑 王冠",p:500,s:"head",v:"👑"},{n:"👓 眼鏡",p:200,s:"face",v:"👓"},{n:"🗡 伝説の剣",p:2000,s:"handR",v:"🗡"}].forEach(i => {
-                const b = document.createElement('div'); b.className="item-card";
-                b.innerHTML = `${i.v} ${i.n}<br>💰${i.p}G<br><button class="m-btn" onclick="buy('${i.n}',${i.p},'${i.s}','${i.v}')">購入</button>`;
+            const items = [
+                {n:"👑 王冠", l:5, p:1000, s:"head", v:"👑"},
+                {n:"🕶 グラサン", l:2, p:300, s:"face", v:"🕶"},
+                {n:"🎈 風船", l:1, p:100, s:"handR", v:"🎈"},
+                {n:"🗡 勇者の剣", l:10, p:5000, s:"handR", v:"🗡"}
+            ];
+            items.forEach(i => {
+                const b = document.createElement('div'); b.className = "card";
+                const isLocked = d.lvl < i.l;
+                b.innerHTML = `${i.v}<br>💰${i.p}<br>${isLocked ? '🔒Lv'+i.l : ''}<br><button class="m-btn ${isLocked?'locked':''}" onclick="buy(${JSON.stringify(i)})">買う</button>`;
+                list.appendChild(b);
+            });
+        }
+        if(id === 'work') {
+            const works = [{n:"配達(簡単)", l:1, s:10},{n:"工事(普通)", l:3, s:30},{n:"探検(激ムズ)", l:6, s:100}];
+            works.forEach(w => {
+                const isLocked = d.lvl < w.l;
+                const b = document.createElement('button'); b.className = `m-btn ${isLocked?'locked':''}`;
+                b.innerHTML = `${w.n}<br>${isLocked ? '🔒Lv'+w.l : '💰UP'}`;
+                b.onclick = () => { if(!isLocked) startWork(w.s); };
                 list.appendChild(b);
             });
         }
         if(id === 'equip') {
-            if(d.items.length === 0) list.innerHTML = "持ち物がないよ";
             d.items.forEach(i => {
                 const b = document.createElement('button'); b.className="m-btn"; b.innerText = i.n;
                 b.onclick = () => { d.eq[i.s] = i.v; editingSlot = i.s; document.getElementById('pos-ctrl').style.display='block'; document.getElementById('cur-slot').innerText=i.n; update(); };
@@ -302,23 +250,58 @@
             });
         }
     }
-    
-    function closeS() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); }
-    
-    function doCare(c, f, cl, h, s) {
-        if(d.cn < c) return alert("お金が足りないよ！");
-        d.cn -= c; d.food = Math.min(100, d.food + f); d.clean = Math.min(100, d.clean + cl); d.hp = Math.min(100, d.hp + h);
-        say(s); update();
-    }
-    
-    function buy(n, p, s, v) {
-        if(d.cn < p) return alert("お金が足りないよ！");
-        d.cn -= p; d.items.push({n, s, v}); alert(n + "を買ったよ！"); update();
+
+    function doCare(c) {
+        if(d.lvl < c.l) return;
+        d.food = Math.min(100, d.food + (c.f||0));
+        d.kizuna = Math.min(100, d.kizuna + (c.k||0));
+        d.clean = Math.min(100, d.clean + (c.cl||0));
+        d.hp = Math.min(100, d.hp + (c.h||0));
+        d.exp += c.e;
+        playAnim(c.a); checkLv(); update();
     }
 
+    function buy(i) {
+        if(d.lvl < i.l || d.cn < i.p) return alert("買えないよ！");
+        d.cn -= i.p; d.items.push(i); update(); openS('shop');
+    }
+
+    function checkLv() {
+        if(d.exp >= d.lvl * 100) {
+            d.exp = 0; d.lvl++;
+            say("レベルアップ！Lv" + d.lvl + "になった！");
+            playAnim('spin');
+            update();
+        }
+    }
+
+    // --- バイト（維持） ---
+    function startWork(speedMult) {
+        closeS(); document.getElementById('game-screen').style.display = 'flex'; isGame = true;
+        const canvas = document.getElementById('game-canvas'); const ctx = canvas.getContext('2d');
+        let playerY = 350, velocity = 0, score = 0, frames = 0, obstacles = [];
+        const loop = () => {
+            if(!isGame) return;
+            ctx.clearRect(0,0,300,400);
+            velocity += 0.8; playerY += velocity;
+            if(playerY > 350) { playerY = 350; velocity = 0; }
+            ctx.font = "40px Arial"; ctx.fillText("☁️", 50, playerY);
+            if(frames % 60 === 0) obstacles.push({x:300, y:350});
+            obstacles.forEach((o, i) => {
+                o.x -= (5 + (speedMult/10)); ctx.fillText("🌵", o.x, o.y);
+                if(o.x < 80 && o.x > 20 && playerY > 310) endGame(score, speedMult);
+                if(o.x < -50) { obstacles.splice(i, 1); score++; }
+            });
+            ctx.fillStyle = "white"; ctx.fillText("Score: " + score, 10, 30);
+            frames++; requestAnimationFrame(loop);
+        };
+        canvas.onclick = () => { if(playerY > 300) velocity = -12; };
+        loop();
+    }
+    function endGame(score, mult) { isGame = false; const pay = score * mult; d.cn += pay; d.exp += score * 2; document.getElementById('game-screen').style.display = 'none'; alert("お給料 " + pay + "G！"); update(); checkLv(); }
+    function quitGame() { isGame = false; document.getElementById('game-screen').style.display = 'none'; }
+    function closeS() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); }
     function moveEq(x, y) { if(editingSlot) { d.pos[editingSlot].x += x; d.pos[editingSlot].y += y; update(); } }
-    function checkLv() { if(d.exp >= d.lvl*100) { d.lvl++; d.exp = 0; say("レベルアップ！天才かも！"); update(); } }
-    function reset() { if(confirm("リセットする？")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
