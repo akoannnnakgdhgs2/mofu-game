@@ -15,117 +15,120 @@
         .bar-bg { flex-grow: 1; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
         .bar-fill { height: 100%; transition: 0.5s; }
         .lv-area { position: fixed; top: 15px; right: 15px; z-index: 100; }
-        .lv-circle-box { width: 85px; height: 85px; position: relative; background: white; border-radius: 50%; border: 5px solid var(--gold); }
-        .lv-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: var(--main); }
+        .lv-circle-box { width: 85px; height: 85px; position: relative; background: white; border-radius: 50%; border: 5px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-direction: column; }
         #mofu-container { position: absolute; transition: left 2.5s ease-in-out, top 2.5s ease-in-out; display: flex; flex-direction: column; align-items: center; z-index: 50; }
         .mofu-body { width: 140px; height: 130px; background: #fff; border-radius: 50% 50% 48% 48%; border: 6px solid var(--sub); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; }
-        .mofu-body.petting { transform: scale(0.9); border-color: var(--pink); }
         .face { font-size: 40px; user-select: none; }
-        #speech { position: absolute; top: -95px; background: white; border: 3px solid var(--main); border-radius: 20px; padding: 10px; opacity: 0; transition: 0.3s; font-weight: 900; z-index: 200; }
+        #speech { position: absolute; top: -95px; background: white; border: 3px solid var(--main); border-radius: 20px; padding: 10px; opacity: 0; transition: 0.3s; font-weight: 900; z-index: 200; white-space: nowrap; }
         .menu { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; z-index: 110; }
-        .btn { padding: 12px 16px; border-radius: 20px; border: none; background: white; font-weight: 900; border-bottom: 5px solid var(--sub); cursor: pointer; }
+        .btn { padding: 12px 16px; border-radius: 20px; border: none; background: white; font-weight: 900; border-bottom: 5px solid var(--sub); cursor: pointer; font-family: inherit; }
+        .btn-orange { background: var(--orange); color: white; border-bottom-color: #e6a742; }
         .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: white; border-radius: 40px 40px 0 0; border-top: 8px solid var(--sub); z-index: 400; transition: 0.4s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
         .sheet.open { bottom: 0; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .fade { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; z-index:350; }
-        .custom-pop { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 6px solid var(--orange); padding: 30px; border-radius: 35px; z-index: 2000; text-align: center; display: none; width: 80%; }
-        .custom-pop.show { display: block; }
+        .id-card { background: #333; color: #00ffcc; padding: 10px; border-radius: 10px; font-family: monospace; text-align: center; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div id="start-screen" style="position:fixed; inset:0; background:white; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <h2 style="color:var(--orange);">モフ進化DX</h2>
-    <input type="text" id="un-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub);" placeholder="きみのなまえ">
-    <input type="text" id="pn-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub);" placeholder="モフのなまえ">
-    <button class="btn" style="background:var(--orange); color:white;" onclick="startGame()">はじめる！</button>
-</div>
-
-<div id="game-pop" class="custom-pop">
-    <h3 id="pop-title">おしらせ</h3>
-    <p id="pop-msg"></p>
-    <button class="btn" onclick="closePop()">わかった！</button>
+    <input type="text" id="un-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="きみのなまえ">
+    <input type="text" id="pn-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="モフのなまえ">
+    <button class="btn btn-orange" style="margin-top:15px; width:70%;" onclick="startGame()">冒険をはじめる！</button>
 </div>
 
 <div class="ui-header">
     <div class="status-box">
         <div class="status-row">💖<div class="bar-bg"><div id="b-kizuna" class="bar-fill" style="background:var(--heart);"></div></div></div>
-        <div class="status-row">🍪<div class="bar-bg"><div id="b-fl" class="bar-fill" style="background:var(--orange);"></div></div></div>
         <div class="status-row">⚡<div class="bar-bg"><div id="b-hp" class="bar-fill" style="background:var(--blue);"></div></div></div>
-        <div style="font-weight:900; color:var(--main);">💰 <span id="coin">100</span></div>
+        <div style="font-weight:900; color:var(--main); margin-top:5px;">💰 <span id="coin">100</span></div>
     </div>
 </div>
 
-<div class="lv-area"><div class="lv-circle-box"><div class="lv-num">Lv<span id="v-lvl">1</span></div></div></div>
+<div class="lv-area"><div class="lv-circle-box"><div style="font-size:10px;">Lv</div><div id="v-lvl" style="font-size:24px; font-weight:900;">1</div></div></div>
 
 <div id="mofu-container">
     <div id="speech"></div>
     <div id="my-costume" style="position:absolute; top:-50px; font-size:60px;"></div>
-    <div id="my-mofu" class="mofu-body" onmousedown="petStart()" ontouchstart="petStart()" onmouseup="petEnd()" ontouchend="petEnd()">
+    <div id="my-mofu" class="mofu-body" onclick="petMofu()">
         <div id="my-face" class="face">・⩊・</div>
     </div>
-    <h3 id="mofu-name-display" style="background:white; padding:2px 10px; border-radius:10px; border:2px solid var(--sub);"></h3>
+    <h3 id="mofu-name-display" style="background:white; padding:2px 10px; border-radius:10px; border:2px solid var(--sub); margin-top:10px;"></h3>
 </div>
 
 <div class="menu">
+    <button class="btn btn-orange" onclick="openSheet('comm-sheet')">📶 通信</button>
     <button class="btn" onclick="openSheet('care-sheet')">✨ お世話</button>
     <button class="btn" onclick="openSheet('work-sheet')">⚒️ バイト</button>
     <button class="btn" onclick="openSheet('shop-sheet')">🛒 ショップ</button>
-    <button class="btn" onclick="openSheet('locker-sheet')">📦 ロッカー</button>
     <button class="btn" onclick="resetGame()" style="background:#ff8a80; color:white;">🔄 リセット</button>
 </div>
 
-<div id="care-sheet" class="sheet"><h3>✨ お世話をする</h3><hr><div id="care-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
-<div id="shop-sheet" class="sheet"><h3>🛒 ショップ</h3><hr><div id="shop-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
-<div id="work-sheet" class="sheet"><h3>⚒️ バイト</h3><hr><div id="work-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
-<div id="locker-sheet" class="sheet"><h3>📦 ロッカー</h3><hr><div id="locker-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="comm-sheet" class="sheet">
+    <h3>📶 通信ポータル</h3><hr>
+    <p>きみのマイID:</p><div class="id-card" id="my-id">発行中...</div>
+    <button class="btn" style="width:100%" onclick="copyId()">IDをコピー</button>
+    <button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button>
+</div>
+
+<div id="care-sheet" class="sheet"><h3>✨ お世話をする</h3><hr><div class="grid" id="care-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="work-sheet" class="sheet"><h3>⚒️ バイト</h3><hr><div class="grid" id="work-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="shop-sheet" class="sheet"><h3>🛒 ショップ</h3><hr><div class="grid" id="shop-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="dark-fade" class="fade" onclick="closeSheet()"></div>
 
 <script>
-    // データの読み込み
-    let d = JSON.parse(localStorage.getItem('mofu_data')) || { un:"", pn:"", cn:100, lvl:1, exp:0, fl:100, hp:100, items:[], eq:"", kizuna:0 };
+    let d = JSON.parse(localStorage.getItem('mofu_data_v2')) || { un:"", pn:"", cn:100, lvl:1, exp:0, hp:100, items:[], eq:"", kizuna:0 };
+    let peer = null;
 
-    function saveData() { localStorage.setItem('mofu_data', JSON.stringify(d)); }
+    function saveData() { localStorage.setItem('mofu_data_v2', JSON.stringify(d)); }
 
     function getPhrases() {
         return {
-            idle: [d.un + "、なにしてるの？", "トコトコ…冒険だ！", "なでなでして？", d.un + "だいすき！"],
-            pet: ["むぎゅ〜！💖", d.un + "の手、あったかいね！", "幸せだなぁ〜"],
-            lvl: ["レベルアップ！やったー！", d.un + "、見て見て！"]
+            idle: [d.un + "、なにしてるの？", "冒険にいきたいな！", "なでなでして〜", d.un + "だいすき！"],
+            pet: ["むぎゅ〜！💖", d.un + "の手、あったかい！", "えへへ、うれしい！"],
+            work: ["バイトがんばるぞ！", "お金をためて買い物しよう！"]
         };
     }
 
     function startGame() {
         if(!d.un) {
-            d.un = document.getElementById('un-in').value || "きみ";
+            d.un = document.getElementById('un-in').value || "マスター";
             d.pn = document.getElementById('pn-in').value || "モフ";
         }
         document.getElementById('start-screen').style.display='none';
         document.getElementById('mofu-name-display').innerText = d.pn;
         updateUI(); startWalking();
-        setInterval(() => { if(Math.random()<0.2) { const ph = getPhrases(); say(ph.idle[Math.floor(Math.random()*ph.idle.length)]); } }, 10000);
+        initPeer();
+        setInterval(() => { if(Math.random()<0.1) { const ph = getPhrases(); say(ph.idle[Math.floor(Math.random()*ph.idle.length)]); } }, 10000);
     }
 
-    // 初回起動時のチェック
     if(d.un) startGame();
+
+    function initPeer() {
+        peer = new Peer();
+        peer.on('open', id => document.getElementById('my-id').innerText = id);
+    }
 
     function updateUI() {
         document.getElementById('coin').innerText = d.cn;
         document.getElementById('v-lvl').innerText = d.lvl;
         document.getElementById('b-kizuna').style.width = d.kizuna + "%";
-        document.getElementById('b-fl').style.width = d.fl + "%";
         document.getElementById('b-hp').style.width = d.hp + "%";
         document.getElementById('my-costume').innerText = d.eq;
         saveData(); updateLists();
     }
 
-    function petStart() { 
-        document.getElementById('my-mofu').classList.add('petting'); 
-        document.getElementById('my-face').innerText = "＞⩊＜";
-        d.kizuna = Math.min(100, d.kizuna + 2); d.exp += 5;
+    function petMofu() {
         const ph = getPhrases(); say(ph.pet[Math.floor(Math.random()*ph.pet.length)]);
+        d.kizuna = Math.min(100, d.kizuna + 1); d.exp += 2;
+        document.getElementById('my-face').innerText = "＞⩊＜";
+        setTimeout(() => document.getElementById('my-face').innerText = "・⩊・", 1000);
         checkLv(); updateUI();
     }
-    function petEnd() { document.getElementById('my-mofu').classList.remove('petting'); document.getElementById('my-face').innerText = "・⩊・"; }
+
+    function checkLv() { if(d.exp >= 50 + (d.lvl * 20)) { d.lvl++; d.exp = 0; alert("レベルアップ！"); updateUI(); } }
 
     function startWalking() {
         setInterval(() => {
@@ -133,38 +136,41 @@
             const x = Math.random() * (window.innerWidth - 150);
             const y = Math.random() * (window.innerHeight - 300) + 100;
             c.style.left = x + 'px'; c.style.top = y + 'px';
-        }, 4000);
+        }, 5000);
     }
 
     function say(t) { const s=document.getElementById('speech'); s.innerText=t; s.style.opacity=1; setTimeout(()=>s.style.opacity=0, 2500); }
-    function checkLv() { if(d.exp>=100){ d.lvl++; d.exp=0; openPop("LEVEL UP!", d.pn+"がレベル"+d.lvl+"になったよ！"); } }
-    function openPop(title, msg) { document.getElementById('pop-title').innerText=title; document.getElementById('pop-msg').innerText=msg; document.getElementById('game-pop').classList.add('show'); }
-    function closePop() { document.getElementById('game-pop').classList.remove('show'); }
     function openSheet(id) { document.getElementById(id).classList.add('open'); document.getElementById('dark-fade').style.display='block'; }
     function closeSheet() { document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open')); document.getElementById('dark-fade').style.display='none'; }
-    function resetGame() { if(confirm("データを消して最初からにする？")) { localStorage.removeItem('mofu_data'); location.reload(); } }
+    function copyId() { navigator.clipboard.writeText(document.getElementById('my-id').innerText); alert("IDをコピーしたよ！"); }
+    function resetGame() { if(confirm("最初からやり直す？")) { localStorage.removeItem('mofu_data_v2'); location.reload(); } }
 
     function updateLists() {
+        // お世話リスト
+        const cl = document.getElementById('care-list'); cl.innerHTML = "";
+        ["🎾ボール", "🛀お風呂", "🛌お昼寝", "🏃走る", "🖌️ブラシ"].forEach(n => {
+            const b = document.createElement('button'); b.className='btn'; b.innerText=n;
+            b.onclick = () => { d.kizuna = Math.min(100, d.kizuna+5); d.hp = Math.max(0, d.hp-10); say(n + "して楽しかった！"); closeSheet(); updateUI(); };
+            cl.appendChild(b);
+        });
+
+        // バイトリスト（手動）
+        const wl = document.getElementById('work-list'); wl.innerHTML = "";
+        [{n:"🧹掃除", m:30, h:20}, {n:"📦運び", m:80, h:40}, {n:"🚚配達", m:200, h:60}].forEach(w => {
+            const b = document.createElement('button'); b.className='btn'; b.innerText=`${w.n}(+💰${w.m})`;
+            b.onclick = () => {
+                if(d.hp < w.h) { alert("体力が足りないよ！お昼寝させてあげて。"); return; }
+                d.cn += w.m; d.hp -= w.h; say(w.n + "がんばったよ！💰"); closeSheet(); updateUI();
+            };
+            wl.appendChild(b);
+        });
+
         // ショップ
         const sl = document.getElementById('shop-list'); sl.innerHTML = "";
-        [{n:"🍎りんご", p:10, e:"🍎"}, {n:"👑王冠", p:100, e:"👑"}].forEach(i => {
+        [{n:"🎀リボン", p:50, e:"🎀"}, {n:"👑王冠", p:500, e:"👑"}, {n:"🍭アメ", p:20, e:"🍭"}].forEach(i => {
             const b = document.createElement('button'); b.className='btn'; b.innerText=`${i.n}(💰${i.p})`;
-            b.onclick = () => { if(d.cn>=i.p){ d.cn-=i.p; d.items.push(i.e); updateUI(); } };
+            b.onclick = () => { if(d.cn>=i.p){ d.cn-=i.p; d.items.push(i.e); updateUI(); } else { alert("お金が足りないよ！"); } };
             sl.appendChild(b);
-        });
-        // ロッカー
-        const ll = document.getElementById('locker-list'); ll.innerHTML = "";
-        [...new Set(d.items)].forEach(i => {
-            const b = document.createElement('button'); b.className='btn'; b.innerText=i;
-            b.onclick = () => { d.eq=i; updateUI(); closeSheet(); };
-            ll.appendChild(b);
-        });
-        // バイト
-        const wl = document.getElementById('work-list'); wl.innerHTML = "";
-        [{n:"掃除", m:20}].forEach(w => {
-            const b = document.createElement('button'); b.className='btn'; b.innerText=`${w.n}(💰${w.m})`;
-            b.onclick = () => { d.cn+=w.m; updateUI(); closeSheet(); say("バイトお疲れ様！"); };
-            wl.appendChild(b);
         });
     }
 </script>
