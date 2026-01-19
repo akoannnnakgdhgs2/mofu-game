@@ -3,51 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>モフ進化DX -Premium-</title>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <title>モフ進化DX -Ultimate-</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap');
         :root { --main: #6d4c41; --sub: #d7ccc8; --pink: #ff8a80; --orange: #ffb74d; --blue: #81d4fa; --purple: #b39ddb; --gold: #ffd700; --heart: #f44336; }
-        body { margin: 0; height: 100vh; overflow: hidden; background: #fffcf5; font-family: 'Zen Maru Gothic', sans-serif; touch-action: none; }
+        body { margin: 0; height: 100vh; overflow: hidden; background: #fffcf5; font-family: 'Zen Maru Gothic', sans-serif; touch-action: none; transition: background 1.5s; }
         .ui-header { position: fixed; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
-        .status-box { background: rgba(255,255,255,0.95); padding: 10px; border-radius: 20px; border: 3px solid var(--sub); pointer-events: auto; width: 155px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .status-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; font-size: 11px; }
+        .status-box { background: rgba(255,255,255,0.95); padding: 10px; border-radius: 20px; border: 3px solid var(--sub); pointer-events: auto; width: 160px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .status-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; font-size: 12px; font-weight: 900; }
         .bar-bg { flex-grow: 1; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
         .bar-fill { height: 100%; transition: 0.5s; }
         .lv-area { position: fixed; top: 15px; right: 15px; z-index: 100; }
-        .lv-circle-box { width: 85px; height: 85px; position: relative; background: white; border-radius: 50%; border: 5px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .lv-circle-box { width: 85px; height: 85px; background: white; border-radius: 50%; border: 5px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        
         #mofu-container { position: absolute; transition: left 2.5s ease-in-out, top 2.5s ease-in-out; display: flex; flex-direction: column; align-items: center; z-index: 50; }
-        .mofu-body { width: 140px; height: 130px; background: #fff; border-radius: 50% 50% 48% 48%; border: 6px solid var(--sub); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; }
+        .mofu-body { width: 140px; height: 130px; background: #fff; border-radius: 50% 50% 48% 48%; border: 6px solid var(--sub); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; transition: 0.3s; }
+        .mofu-body.sleeping { transform: scale(0.9, 0.6) translateY(30px); filter: brightness(0.7); }
         .face { font-size: 40px; user-select: none; }
         #speech { position: absolute; top: -95px; background: white; border: 3px solid var(--main); border-radius: 20px; padding: 10px; opacity: 0; transition: 0.3s; font-weight: 900; z-index: 200; white-space: nowrap; }
+        
         .menu { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; z-index: 110; }
         .btn { padding: 12px 16px; border-radius: 20px; border: none; background: white; font-weight: 900; border-bottom: 5px solid var(--sub); cursor: pointer; font-family: inherit; }
-        .btn-orange { background: var(--orange); color: white; border-bottom-color: #e6a742; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        
         .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: white; border-radius: 40px 40px 0 0; border-top: 8px solid var(--sub); z-index: 400; transition: 0.4s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
         .sheet.open { bottom: 0; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px; }
         .fade { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; z-index:350; }
-        .id-card { background: #333; color: #00ffcc; padding: 10px; border-radius: 10px; font-family: monospace; text-align: center; margin: 10px 0; }
+        
+        /* ミニゲーム：目押し */
+        #game-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #gauge-container { width: 80%; height: 30px; background: #444; border-radius: 15px; position: relative; margin: 30px 0; overflow: hidden; }
+        #gauge-bar { width: 10%; height: 100%; background: var(--gold); position: absolute; left: 45%; }
+        #gauge-pointer { width: 5px; height: 100%; background: white; position: absolute; left: 0; transition: none; }
+        
+        .fx { position: absolute; pointer-events: none; animation: fxAnim 1s forwards; font-size: 30px; z-index: 600; }
+        @keyframes fxAnim { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
 <body>
 
 <div id="start-screen" style="position:fixed; inset:0; background:white; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h2 style="color:var(--orange);">モフ進化DX</h2>
+    <h2 style="color:var(--orange); font-size: 32px;">モフ進化DX</h2>
     <input type="text" id="un-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="きみのなまえ">
     <input type="text" id="pn-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="モフのなまえ">
-    <button class="btn btn-orange" style="margin-top:15px; width:70%;" onclick="startGame()">冒険をはじめる！</button>
+    <button class="btn" style="background:var(--orange); color:white; width:70%;" onclick="startGame()">冒険をはじめる！</button>
+</div>
+
+<div id="game-overlay">
+    <h2 id="game-title">バイト中！</h2>
+    <div id="tap-game" style="display:none; text-align:center;">
+        <p>連打でお金を稼げ！</p>
+        <div id="game-target" style="font-size: 100px; cursor: pointer;">📦</div>
+        <div id="game-score" style="font-size: 24px; margin-top:10px;">ノルマ: 0 / 20</div>
+    </div>
+    <div id="gauge-game" style="display:none; text-align:center; width:100%;">
+        <p>真ん中で止めて成功させろ！</p>
+        <div id="gauge-container"><div id="gauge-bar"></div><div id="gauge-pointer"></div></div>
+        <button class="btn" onclick="stopGauge()" style="width:150px; height:60px;">ストップ！</button>
+    </div>
+    <div id="game-timer" style="font-size: 24px; margin-top: 20px;">残り: 10秒</div>
 </div>
 
 <div class="ui-header">
     <div class="status-box">
         <div class="status-row">💖<div class="bar-bg"><div id="b-kizuna" class="bar-fill" style="background:var(--heart);"></div></div></div>
         <div class="status-row">⚡<div class="bar-bg"><div id="b-hp" class="bar-fill" style="background:var(--blue);"></div></div></div>
-        <div style="font-weight:900; color:var(--main); margin-top:5px;">💰 <span id="coin">100</span></div>
+        <div style="font-weight:900; color:var(--main); margin-top:5px; font-size:16px;">💰 <span id="coin">100</span></div>
     </div>
 </div>
 
-<div class="lv-area"><div class="lv-circle-box"><div style="font-size:10px;">Lv</div><div id="v-lvl" style="font-size:24px; font-weight:900;">1</div></div></div>
+<div class="lv-area"><div class="lv-circle-box"><div style="font-size:10px; font-weight:900;">Lv</div><div id="v-lvl" style="font-size:30px; font-weight:900;">1</div></div></div>
 
 <div id="mofu-container">
     <div id="speech"></div>
@@ -55,61 +81,41 @@
     <div id="my-mofu" class="mofu-body" onclick="petMofu()">
         <div id="my-face" class="face">・⩊・</div>
     </div>
-    <h3 id="mofu-name-display" style="background:white; padding:2px 10px; border-radius:10px; border:2px solid var(--sub); margin-top:10px;"></h3>
+    <h3 id="mofu-name-display" style="background:white; padding:4px 15px; border-radius:15px; border:3px solid var(--sub); margin-top:10px;"></h3>
 </div>
 
 <div class="menu">
-    <button class="btn btn-orange" onclick="openSheet('comm-sheet')">📶 通信</button>
     <button class="btn" onclick="openSheet('care-sheet')">✨ お世話</button>
     <button class="btn" onclick="openSheet('work-sheet')">⚒️ バイト</button>
     <button class="btn" onclick="openSheet('shop-sheet')">🛒 ショップ</button>
     <button class="btn" onclick="resetGame()" style="background:#ff8a80; color:white;">🔄 リセット</button>
 </div>
 
-<div id="comm-sheet" class="sheet">
-    <h3>📶 通信ポータル</h3><hr>
-    <p>きみのマイID:</p><div class="id-card" id="my-id">発行中...</div>
-    <button class="btn" style="width:100%" onclick="copyId()">IDをコピー</button>
-    <button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button>
-</div>
-
-<div id="care-sheet" class="sheet"><h3>✨ お世話をする</h3><hr><div class="grid" id="care-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
-<div id="work-sheet" class="sheet"><h3>⚒️ バイト</h3><hr><div class="grid" id="work-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="care-sheet" class="sheet"><h3>✨ お世話</h3><hr><div class="grid" id="care-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="work-sheet" class="sheet"><h3>⚒️ バイト選択（Lvが必要だよ）</h3><hr><div class="grid" id="work-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="shop-sheet" class="sheet"><h3>🛒 ショップ</h3><hr><div class="grid" id="shop-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="dark-fade" class="fade" onclick="closeSheet()"></div>
 
 <script>
-    let d = JSON.parse(localStorage.getItem('mofu_data_v2')) || { un:"", pn:"", cn:100, lvl:1, exp:0, hp:100, items:[], eq:"", kizuna:0 };
-    let peer = null;
+    let d = JSON.parse(localStorage.getItem('mofu_v4')) || { un:"", pn:"", cn:100, lvl:1, exp:0, hp:100, items:[], eq:"", kizuna:0 };
+    let isSleeping = false;
+    let gaugePos = 0;
+    let gaugeSpeed = 2;
+    let gaugeTimer = null;
 
-    function saveData() { localStorage.setItem('mofu_data_v2', JSON.stringify(d)); }
-
-    function getPhrases() {
-        return {
-            idle: [d.un + "、なにしてるの？", "冒険にいきたいな！", "なでなでして〜", d.un + "だいすき！"],
-            pet: ["むぎゅ〜！💖", d.un + "の手、あったかい！", "えへへ、うれしい！"],
-            work: ["バイトがんばるぞ！", "お金をためて買い物しよう！"]
-        };
-    }
+    function saveData() { localStorage.setItem('mofu_v4', JSON.stringify(d)); }
 
     function startGame() {
         if(!d.un) {
-            d.un = document.getElementById('un-in').value || "マスター";
+            d.un = document.getElementById('un-in').value || "いっくん";
             d.pn = document.getElementById('pn-in').value || "モフ";
         }
         document.getElementById('start-screen').style.display='none';
         document.getElementById('mofu-name-display').innerText = d.pn;
         updateUI(); startWalking();
-        initPeer();
-        setInterval(() => { if(Math.random()<0.1) { const ph = getPhrases(); say(ph.idle[Math.floor(Math.random()*ph.idle.length)]); } }, 10000);
     }
 
     if(d.un) startGame();
-
-    function initPeer() {
-        peer = new Peer();
-        peer.on('open', id => document.getElementById('my-id').innerText = id);
-    }
 
     function updateUI() {
         document.getElementById('coin').innerText = d.cn;
@@ -121,17 +127,24 @@
     }
 
     function petMofu() {
-        const ph = getPhrases(); say(ph.pet[Math.floor(Math.random()*ph.pet.length)]);
-        d.kizuna = Math.min(100, d.kizuna + 1); d.exp += 2;
-        document.getElementById('my-face').innerText = "＞⩊＜";
-        setTimeout(() => document.getElementById('my-face').innerText = "・⩊・", 1000);
+        if(isSleeping) { wakeUp(); return; }
+        spawnFx("❤️"); d.kizuna = Math.min(100, d.kizuna + 1); d.exp += 2;
+        say(d.un + "、なでなで最高！");
         checkLv(); updateUI();
     }
 
-    function checkLv() { if(d.exp >= 50 + (d.lvl * 20)) { d.lvl++; d.exp = 0; alert("レベルアップ！"); updateUI(); } }
+    function spawnFx(txt) {
+        const f = document.createElement('div'); f.className='fx'; f.innerText=txt;
+        const c = document.getElementById('mofu-container');
+        f.style.left = c.offsetLeft + 50 + 'px'; f.style.top = c.offsetTop + 'px';
+        document.body.appendChild(f); setTimeout(()=>f.remove(), 1000);
+    }
+
+    function checkLv() { if(d.exp >= d.lvl * 30) { d.lvl++; d.exp = 0; alert("レベルアップ！Lv" + d.lvl + "になった！"); updateUI(); } }
 
     function startWalking() {
         setInterval(() => {
+            if(isSleeping) return;
             const c = document.getElementById('mofu-container');
             const x = Math.random() * (window.innerWidth - 150);
             const y = Math.random() * (window.innerHeight - 300) + 100;
@@ -139,37 +152,104 @@
         }, 5000);
     }
 
-    function say(t) { const s=document.getElementById('speech'); s.innerText=t; s.style.opacity=1; setTimeout(()=>s.style.opacity=0, 2500); }
+    // --- バイト：連打ゲーム ---
+    function startTapWork(m, h, target) {
+        closeSheet();
+        const overlay = document.getElementById('game-overlay');
+        document.getElementById('tap-game').style.display = 'block';
+        document.getElementById('gauge-game').style.display = 'none';
+        overlay.style.display = 'flex';
+        let count = 0; let timeLeft = 10;
+        document.getElementById('game-score').innerText = `ノルマ: ${count} / ${target}`;
+        
+        const t = setInterval(() => {
+            timeLeft--; document.getElementById('game-timer').innerText = `残り: ${timeLeft}秒`;
+            if(timeLeft <= 0) {
+                clearInterval(t); overlay.style.display = 'none';
+                if(count >= target) { d.cn += m; d.hp -= h; d.exp += 15; say("成功！💰" + m + "ゲット！"); }
+                else { say("失敗...もっと速く叩こう！"); }
+                updateUI();
+            }
+        }, 1000);
+        document.getElementById('game-target').onclick = () => { count++; document.getElementById('game-score').innerText = `ノルマ: ${count} / ${target}`; spawnFx("✨"); };
+    }
+
+    // --- バイト：目押しゲーム ---
+    function startGaugeWork(m, h, speed) {
+        closeSheet();
+        const overlay = document.getElementById('game-overlay');
+        document.getElementById('tap-game').style.display = 'none';
+        document.getElementById('gauge-game').style.display = 'block';
+        overlay.style.display = 'flex';
+        gaugePos = 0; gaugeSpeed = speed;
+        gaugeTimer = setInterval(() => {
+            gaugePos += gaugeSpeed; if(gaugePos >= 100 || gaugePos <= 0) gaugeSpeed *= -1;
+            document.getElementById('gauge-pointer').style.left = gaugePos + "%";
+        }, 20);
+    }
+
+    function stopGauge() {
+        clearInterval(gaugeTimer);
+        const overlay = document.getElementById('game-overlay');
+        overlay.style.display = 'none';
+        if(gaugePos >= 45 && gaugePos <= 55) {
+            d.cn += 300; d.hp -= 40; d.exp += 50; say("神業！ボーナス💰300！");
+        } else if(gaugePos >= 35 && gaugePos <= 65) {
+            d.cn += 100; d.hp -= 40; d.exp += 20; say("成功！💰100ゲット！");
+        } else { say("失敗...タイミングが難しいね"); }
+        updateUI();
+    }
+
+    // --- 寝るモード ---
+    function goSleep(mode) {
+        closeSheet(); isSleeping = true;
+        if(mode === 'deep') {
+            document.body.style.background = "#000510";
+            document.getElementById('my-face').innerText = "＝⩊＝";
+            say("スヤァアア...（熟睡中）");
+        } else {
+            document.body.style.background = "#222";
+            document.getElementById('my-face').innerText = "－⩊－";
+            say("ムニャムニャ...💤");
+        }
+        document.getElementById('my-mofu').classList.add('sleeping');
+        let sInt = setInterval(() => {
+            if(!isSleeping) { clearInterval(sInt); return; }
+            d.hp = Math.min(100, d.hp + (mode==='deep'?10:4));
+            updateUI(); spawnFx("💤");
+        }, 2000);
+    }
+
+    function wakeUp() { isSleeping = false; document.body.style.background = "#fffcf5"; document.getElementById('my-mofu').classList.remove('sleeping'); document.getElementById('my-face').innerText = "・⩊・"; say("パチッ！おはよ！"); }
+
     function openSheet(id) { document.getElementById(id).classList.add('open'); document.getElementById('dark-fade').style.display='block'; }
     function closeSheet() { document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open')); document.getElementById('dark-fade').style.display='none'; }
-    function copyId() { navigator.clipboard.writeText(document.getElementById('my-id').innerText); alert("IDをコピーしたよ！"); }
-    function resetGame() { if(confirm("最初からやり直す？")) { localStorage.removeItem('mofu_data_v2'); location.reload(); } }
+    function resetGame() { if(confirm("消す？")) { localStorage.clear(); location.reload(); } }
 
     function updateLists() {
-        // お世話リスト
         const cl = document.getElementById('care-list'); cl.innerHTML = "";
-        ["🎾ボール", "🛀お風呂", "🛌お昼寝", "🏃走る", "🖌️ブラシ"].forEach(n => {
-            const b = document.createElement('button'); b.className='btn'; b.innerText=n;
-            b.onclick = () => { d.kizuna = Math.min(100, d.kizuna+5); d.hp = Math.max(0, d.hp-10); say(n + "して楽しかった！"); closeSheet(); updateUI(); };
-            cl.appendChild(b);
+        [{n:"🛌 お昼寝(回復:小)", f:()=>goSleep('light')}, {n:"🌙 おやすみ(回復:大)", f:()=>goSleep('deep')}].forEach(c => {
+            const b = document.createElement('button'); b.className='btn'; b.innerText=c.n; b.onclick = c.f; cl.appendChild(b);
         });
 
-        // バイトリスト（手動）
         const wl = document.getElementById('work-list'); wl.innerHTML = "";
-        [{n:"🧹掃除", m:30, h:20}, {n:"📦運び", m:80, h:40}, {n:"🚚配達", m:200, h:60}].forEach(w => {
-            const b = document.createElement('button'); b.className='btn'; b.innerText=`${w.n}(+💰${w.m})`;
-            b.onclick = () => {
-                if(d.hp < w.h) { alert("体力が足りないよ！お昼寝させてあげて。"); return; }
-                d.cn += w.m; d.hp -= w.h; say(w.n + "がんばったよ！💰"); closeSheet(); updateUI();
-            };
+        const jobs = [
+            {n:"🧹 掃除 (Lv1~)", m:50, h:15, t:20, lv:1, type:'tap'},
+            {n:"📦 運搬 (Lv3~)", m:120, h:30, t:40, lv:3, type:'tap'},
+            {n:"🎯 警備 (Lv5~ / 目押し)", m:250, h:40, s:4, lv:5, type:'gauge'}
+        ];
+        jobs.forEach(j => {
+            const b = document.createElement('button'); b.className='btn';
+            b.innerHTML = `${j.n}<br><span style="font-size:10px; color:var(--orange);">報酬:💰${j.m} / ⚡-${j.h}</span>`;
+            if(d.lvl < j.lv) { b.disabled = true; b.innerHTML += `<br>🔒 Lv${j.lv}で解放`; }
+            b.onclick = () => { if(d.hp < j.h) return alert("体力が足りない！"); j.type==='tap'?startTapWork(j.m, j.h, j.t):startGaugeWork(j.m, j.h, j.s); };
             wl.appendChild(b);
         });
-
-        // ショップ
+        
         const sl = document.getElementById('shop-list'); sl.innerHTML = "";
-        [{n:"🎀リボン", p:50, e:"🎀"}, {n:"👑王冠", p:500, e:"👑"}, {n:"🍭アメ", p:20, e:"🍭"}].forEach(i => {
+        [{n:"👑王冠", p:1000, e:"👑"}, {n:"🎀リボン", p:200, e:"🎀"}].forEach(i => {
             const b = document.createElement('button'); b.className='btn'; b.innerText=`${i.n}(💰${i.p})`;
-            b.onclick = () => { if(d.cn>=i.p){ d.cn-=i.p; d.items.push(i.e); updateUI(); } else { alert("お金が足りないよ！"); } };
+            b.onclick = () => { if(d.cn>=i.p){ d.cn-=i.p; d.items.push(i.e); updateUI(); } };
             sl.appendChild(b);
         });
     }
