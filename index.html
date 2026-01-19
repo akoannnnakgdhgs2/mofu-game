@@ -1,1 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>モフ進化DX -Full Connect-</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap');
+        :root { --main: #5d4037; --sub: #efebe9; --pink: #ff80ab; --orange: #ffb74d; --blue: #4fc3f7; --green: #81c784; --purple: #b39ddb; }
+        body { margin: 0; height: 100vh; overflow: hidden; background: #fffdf0; font-family: 'Zen Maru Gothic', sans-serif; touch-action: none; user-select: none; }
+
+        /* --- UI --- */
+        .ui-top { position: fixed; top: 10px; left: 10px; z-index: 1000; width: 160px; pointer-events: none; }
+        .bar-wrap { margin-bottom: 5px; background: rgba(255,255,255,0.8); border-radius: 10px; padding: 4px; border: 2px solid var(--sub); }
+        .bar-bg { width: 100%; height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 50%; transition: 0.3s; }
+        .coin-box { position: fixed; top: 15px; right: 80px; background: white; padding: 5px 12px; border-radius: 20px; border: 3px solid gold; font-weight: 900; z-index: 1000; }
+        .lv-badge { position: fixed; top: 10px; right: 10px; width: 55px; height: 55px; background: #ff5252; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* --- モフ --- */
+        #mofu-area { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; }
+        #mofu-container { width: 200px; height: 200px; position: relative; transition: 0.2s; cursor: pointer; }
+        .mofu-body { width: 100%; height: 100%; background: #fff; border-radius: 50% 50% 45% 45%; border: 7px solid var(--sub); position: relative; display: flex; align-items: center; justify-content: center; animation: float 4s infinite ease-in-out; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        #fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+        .heart { position: absolute; font-size: 30px; animation: heartUp 0.8s forwards; }
+        @keyframes heartUp { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
+
+        /* --- メニュー --- */
+        .menu-bar { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 5px; z-index: 2000; }
+        .m-btn { padding: 12px 14px; border-radius: 18px; border: none; background: white; border-bottom: 4px solid #ddd; font-weight: 900; cursor: pointer; font-size: 14px; }
+        .m-btn:active { transform: translateY(2px); border-bottom-width: 0; }
+        .locked { background: #eee !important; color: #999; }
+
+        .sheet { position: fixed; bottom: -110%; left: 0; width: 100%; height: 80%; background: white; border-radius: 30px 30px 0 0; z-index: 3000; transition: 0.4s ease-out; padding: 25px; box-sizing: border-box; overflow-y: auto; }
+        .sheet.open { bottom: 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #eee; }
+
+        #visit-banner { position: fixed; top: 0; width: 100%; background: var(--purple); color: white; text-align: center; padding: 10px; font-weight: 900; z-index: 5000; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="visit-banner">🚀 <span id="friend-name">...</span>の部屋に遊びにきてるよ！</div>
+
+<div id="start-screen" style="position:fixed; inset:0; background:var(--orange); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
+    <h1>✨ モフ進化DX ✨</h1>
+    <input id="u-in" placeholder="きみの名前" style="padding:15px; border-radius:10px; width:70%; margin-bottom:10px; border:none; text-align:center;">
+    <input id="p-in" placeholder="モフの名前" style="padding:15px; border-radius:10px; width:70%; margin-bottom:20px; border:none; text-align:center;">
+    <button class="m-btn" onclick="init()" style="width:70%; background:var(--main); color:white;">ぼうけん開始！</button>
+</div>
+
+<div id="fx-layer"></div>
+
+<div class="ui-top">
+    <div class="bar-wrap">💖 きずな<div class="bar-bg"><div id="b-kz" class="bar-fill" style="background:var(--pink);"></div></div></div>
+    <div class="bar-wrap">🍙 おなか<div class="bar-bg"><div id="b-fd" class="bar-fill" style="background:var(--orange);"></div></div></div>
+    <div class="bar-wrap">🎓 経験値<div class="bar-bg"><div id="b-ex" class="bar-fill" style="background:var(--purple);"></div></div></div>
+</div>
+
+<div class="coin-box">💰 <span id="coin-val">0</span></div>
+<div id="lv-badge" class="lv-badge">1</div>
+
+<div id="mofu-area">
+    <div id="mofu-container">
+        <div id="speech" style="position:absolute; top:-60px; background:white; border:3px solid var(--main); padding:8px 15px; border-radius:20px; font-weight:900; opacity:0; transition:0.3s; white-space:nowrap; pointer-events:none;"></div>
+        <div id="mofu-body" class="mofu-body">
+            <div id="face" style="font-size:60px;">・⩊・</div>
+        </div>
+        <div id="mofu-name" style="text-align:center; margin-top:10px; font-weight:900; background:white; padding:2px 10px; border-radius:10px; border:2px solid var(--sub);"></div>
+    </div>
+</div>
+
+<div class="menu-bar">
+    <button class="m-btn" onclick="openS('care')">🍖 お世話</button>
+    <button class="m-btn" onclick="openS('work')">⚒️ バイト</button>
+    <button class="m-btn" onclick="openS('connect')" style="background:var(--purple); color:white;">🌐 通信</button>
+    <button class="m-btn" onclick="goHome()" id="home-btn" style="display:none; background:var(--green); color:white;">🏠 帰る</button>
+    <button class="m-btn" onclick="resetAll()">🔄</button>
+</div>
+
+<div id="s-care" class="sheet"><h2>お世話メニュー</h2><div id="l-care" class="grid"></div><button class="m-btn" onclick="closeS()" style="width:100%; margin-top:20px;">閉じる</button></div>
+<div id="s-work" class="sheet"><h2>バイトメニュー</h2><div id="l-work" class="grid"></div><button class="m-btn" onclick="closeS()" style="width:100%; margin-top:20px;">閉じる</button></div>
+<div id="s-connect" class="sheet"><h2>🌐 通信おでかけ</h2><p>きみのID: <b id="my-id-show"></b></p><input id="friend-id-in" placeholder="友達のIDを入力" style="padding:15px; width:80%; border:2px solid var(--purple); border-radius:10px;"><button class="m-btn" onclick="visitFriend()" style="margin-top:10px; width:100%; background:var(--purple); color:white;">遊びに行く！</button><button class="m-btn" onclick="closeS()" style="width:100%; margin-top:10px;">閉じる</button></div>
+
+<script>
+    let d = JSON.parse(localStorage.getItem('mofu_v_final')) || {
+        un:"", pn:"", cn:100, lvl:1, exp:0, kz:50, fd:50, myId: Math.floor(1000 + Math.random()*8000)
+    };
+    let isV = false;
+
+    function init() {
+        d.un = document.getElementById('u-in').value || d.un;
+        d.pn = document.getElementById('p-in').value || d.pn;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('my-id-show').innerText = d.myId;
+        setupPetting(); update(); setInterval(saveToNet, 5000);
+    }
+    if(d.un) init();
+
+    function update() {
+        document.getElementById('b-kz').style.width = d.kz+'%';
+        document.getElementById('b-fd').style.width = d.fd+'%';
+        document.getElementById('b-ex').style.width = (d.exp/(d.lvl*100))*100+'%';
+        document.getElementById('coin-val').innerText = d.cn;
+        document.getElementById('lv-badge').innerText = d.lvl;
+        document.getElementById('mofu-name').innerText = d.pn;
+        localStorage.setItem('mofu_v_final', JSON.stringify(d));
+    }
+
+    function say(t) {
+        let s = document.getElementById('speech');
+        s.innerText = t.replace("{un}", d.un); s.style.opacity = 1;
+        setTimeout(() => s.style.opacity = 0, 2500);
+    }
+
+    function setupPetting() {
+        const target = document.getElementById('mofu-container');
+        let isDown = false;
+        const pet = (e) => {
+            if(!isDown) return;
+            let x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            let y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            spawnHeart(x, y);
+            if(!isV) {
+                d.kz = Math.min(100, d.kz + 0.3);
+                if(Math.random()>0.97) say("{un}、なでなでだーいすき！");
+            }
+            update();
+        };
+        target.onmousedown = () => isDown = true;
+        window.onmouseup = () => isDown = false;
+        target.ontouchstart = () => isDown = true;
+        window.ontouchend = () => isDown = false;
+        target.onmousemove = pet; target.ontouchmove = pet;
+    }
+
+    function spawnHeart(x, y) {
+        const h = document.createElement('div');
+        h.className = 'heart'; h.innerText = '❤️';
+        h.style.left = x + 'px'; h.style.top = y + 'px';
+        document.getElementById('fx-layer').appendChild(h);
+        setTimeout(() => h.remove(), 800);
+    }
+
+    function openS(id) {
+        closeS(); document.getElementById('s-'+id).classList.add('open');
+        let l = document.getElementById('l-'+id); if(!l) return; l.innerHTML = "";
+        
+        if(id === 'care') {
+            const items = [
+                {n:"🍙 おにぎり", l:1, f:20, e:10, s:"おいしい！"},
+                {n:"🍖 特上のお肉", l:3, f:60, e:40, s:"ほっぺが落ちる〜！"},
+                {n:"🛀 お風呂", l:1, f:0, e:10, s:"ピカピカになったよ！"}
+            ];
+            items.forEach(i => {
+                let lock = d.lvl < i.l;
+                l.innerHTML += `<div class="card"><b>${i.n}</b><br>${lock?'🔒Lv'+i.l:'OK!'}<br><button class="m-btn ${lock?'locked':''}" onclick="doCare(${i.f},${i.e},${i.l},'${i.s}')">使う</button></div>`;
+            });
+        }
+        if(id === 'work') {
+            const works = [
+                {n:"配達バイト", l:1, m:"50G"},
+                {n:"工事バイト", l:3, m:"150G"},
+                {n:"冒険バイト", l:5, m:"500G"}
+            ];
+            works.forEach(w => {
+                let lock = d.lvl < w.l;
+                l.innerHTML += `<div class="card"><b>${w.n}</b><br>報酬: ${w.m}<br><button class="m-btn ${lock?'locked':''}" onclick="doWork(${w.l},'${w.m}')">${lock?'🔒':'開始!'}</button></div>`;
+            });
+        }
+    }
+
+    function doCare(f, e, l, s) {
+        if(d.lvl < l) return;
+        d.fd = Math.min(100, d.fd + f); d.exp += e;
+        say(s); checkLv(); update(); openS('care');
+    }
+
+    function doWork(l, money) {
+        if(d.lvl < l) return;
+        let gain = parseInt(money);
+        d.cn += gain; d.exp += 20;
+        say("バイトがんばったよ！" + gain + "Gゲット！");
+        checkLv(); update(); closeS();
+    }
+
+    function checkLv() { if(d.exp >= d.lvl*100){ d.lvl++; d.exp=0; say("レベルアップ！Lv"+d.lvl+"だ！"); } }
+    function closeS() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); }
+
+    // --- 通信 ---
+    function saveToNet() {
+        let net = JSON.parse(localStorage.getItem('mofu_net') || '{}');
+        net[d.myId] = { un:d.un, pn:d.pn, lvl:d.lvl };
+        localStorage.setItem('mofu_net', JSON.stringify(net));
+    }
+    function visitFriend() {
+        let fid = document.getElementById('friend-id-in').value;
+        let net = JSON.parse(localStorage.getItem('mofu_net') || '{}');
+        if(net[fid]) {
+            isV = true;
+            document.getElementById('visit-banner').style.display = 'block';
+            document.getElementById('friend-name').innerText = net[fid].un;
+            document.getElementById('home-btn').style.display = 'block';
+            document.getElementById('mofu-name').innerText = net[fid].pn;
+            document.getElementById('mofu-area').style.background = "#e3f2fd";
+            closeS(); say(net[fid].un + "の部屋にきたよ！");
+        } else { alert("IDが見つからないよ"); }
+    }
+    function goHome() { location.reload(); }
+    function resetAll() { if(confirm("消す？")) { localStorage.clear(); location.reload(); } }
+</script>
+</body>
+</html>
 
