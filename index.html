@@ -3,46 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>モフ進化DX -Ultimate Custom-</title>
+    <title>モフ進化DX -Premium-</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap');
         :root { --main: #6d4c41; --sub: #d7ccc8; --pink: #ff8a80; --orange: #ffb74d; --blue: #81d4fa; --purple: #b39ddb; --gold: #ffd700; --heart: #f44336; --green: #81c784; }
         body { margin: 0; height: 100vh; overflow: hidden; background: #fffcf5; font-family: 'Zen Maru Gothic', sans-serif; touch-action: none; transition: background 1.5s; }
-        
-        /* 5つのバーをスッキリ配置 */
         .ui-header { position: fixed; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
         .status-box { background: rgba(255,255,255,0.95); padding: 12px; border-radius: 20px; border: 3px solid var(--sub); pointer-events: auto; width: 170px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .status-row { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; font-weight: 900; }
         .bar-bg { flex-grow: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
         .bar-fill { height: 100%; transition: 0.5s; }
-        
         .lv-area { position: fixed; top: 15px; right: 15px; z-index: 100; }
         .lv-circle-box { width: 80px; height: 80px; background: white; border-radius: 50%; border: 5px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        
         #mofu-container { position: absolute; transition: left 2.5s, top 2.5s; display: flex; flex-direction: column; align-items: center; z-index: 50; }
         .mofu-body { width: 140px; height: 130px; background: #fff; border-radius: 50% 50% 48% 48%; border: 6px solid var(--sub); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; }
-        
-        /* 重ね着スロット */
         .slot { position: absolute; font-size: 50px; pointer-events: none; }
         .slot-head { top: -45px; }
         .slot-face { top: 10px; }
         .slot-body { bottom: -20px; }
         .slot-hand { right: -30px; top: 50px; }
-
         .menu { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; z-index: 110; }
         .btn { padding: 10px 14px; border-radius: 15px; border: none; background: white; font-weight: 900; border-bottom: 4px solid var(--sub); cursor: pointer; font-family: inherit; font-size: 13px; }
         .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: white; border-radius: 40px 40px 0 0; border-top: 8px solid var(--sub); z-index: 400; transition: 0.4s; padding: 25px; box-sizing: border-box; overflow-y: auto; }
         .sheet.open { bottom: 0; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .fade { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; z-index:350; }
-        
-        #game-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
 
-<div id="start-screen" style="position:fixed; inset:0; background:white; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+<div id="start-screen" style="position:fixed; inset:0; background:white; z-index:3000; display:none; flex-direction:column; align-items:center; justify-content:center;">
     <h2 style="color:var(--orange);">モフ進化DX</h2>
     <input type="text" id="un-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="きみのなまえ">
     <input type="text" id="pn-in" style="padding:15px; margin:5px; border-radius:15px; border:3px solid var(--sub); width:70%;" placeholder="モフのなまえ">
@@ -78,52 +69,36 @@
     <button class="btn" onclick="openSheet('care-sheet')">✨ お世話</button>
     <button class="btn" onclick="openSheet('work-sheet')">⚒️ バイト</button>
     <button class="btn" onclick="openSheet('shop-sheet')">🛒 ショップ</button>
-    <button class="btn" onclick="openSheet('locker-sheet')">📦 クローゼット</button>
-    <button class="btn" onclick="openSheet('comm-sheet')">📶 通信</button>
-    <button class="btn" onclick="resetGame()" style="background:#ff8a80; color:white;">🔄</button>
-</div>
-
-<div id="comm-sheet" class="sheet">
-    <h3>📶 通信モード</h3><hr>
-    <p>マイID: <span id="my-id" style="font-family:monospace; background:#eee; padding:5px;">発行中...</span></p>
-    <input type="text" id="peer-id-input" style="width:100%; padding:10px; margin:10px 0;" placeholder="相手のIDを入力">
-    <button class="btn" style="width:100%; background:var(--blue); color:white;" onclick="connectToPeer()">つながる！</button>
-    <button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">閉じる</button>
+    <button class="btn" onclick="openSheet('locker-sheet')">📦 ロッカー</button>
+    <button class="btn" onclick="resetGame()" style="background:#ff8a80; color:white;">🔄 リセット</button>
 </div>
 
 <div id="care-sheet" class="sheet"><h3>✨ お世話</h3><hr><div class="grid" id="care-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="shop-sheet" class="sheet"><h3>🛒 ショップ</h3><hr><div class="grid" id="shop-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="work-sheet" class="sheet"><h3>⚒️ バイト</h3><hr><div class="grid" id="work-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
-<div id="locker-sheet" class="sheet"><h3>📦 クローゼット</h3><hr><div class="grid" id="locker-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
+<div id="locker-sheet" class="sheet"><h3>📦 ロッカー</h3><hr><div class="grid" id="locker-list"></div><button class="btn" onclick="closeSheet()" style="width:100%; margin-top:20px;">戻る</button></div>
 <div id="dark-fade" class="fade" onclick="closeSheet()"></div>
 
 <script>
-    let d = JSON.parse(localStorage.getItem('mofu_v5')) || { 
+    let d = JSON.parse(localStorage.getItem('mofu_final_data')) || { 
         un:"", pn:"", cn:100, lvl:1, exp:0, hp:100, food:100, clean:100, sleep:100, kizuna:0, 
         items:[], eq:{head:"", face:"", body:"", hand:""} 
     };
 
-    const shopItems = [
-        {n:"🍎りんご", p:10, t:"food", v:20}, {n:"🍖お肉", p:30, t:"food", v:50}, {n:"🍰ケーキ", p:100, t:"food", v:100},
-        {n:"🧼石鹸", p:20, t:"clean", v:40}, {n:"🧴シャンプー", p:50, t:"clean", v:80},
-        {n:"👑王冠", p:500, t:"head", e:"👑"}, {n:"🎀リボン", p:100, t:"head", e:"🎀"},
-        {n:"🕶サングラス", p:150, t:"face", e:"🕶"}, {n:"😷マスク", p:50, t:"face", e:"😷"},
-        {n:"👕シャツ", p:200, t:"body", e:"👕"}, {n:"👘キモノ", p:800, t:"body", e:"👘"},
-        {n:"🗡剣", p:1000, t:"hand", e:"🗡"}, {n:"🪄ステッキ", p:600, t:"hand", e:"🪄"}
-    ];
-
-    function saveData() { localStorage.setItem('mofu_v5', JSON.stringify(d)); }
+    function saveData() { localStorage.setItem('mofu_final_data', JSON.stringify(d)); }
 
     function startGame() {
-        if(!d.un) {
-            d.un = document.getElementById('un-in').value || "いっくん";
-            d.pn = document.getElementById('pn-in').value || "モフ";
-        }
+        d.un = document.getElementById('un-in').value || d.un || "いっくん";
+        d.pn = document.getElementById('pn-in').value || d.pn || "モフ";
         document.getElementById('start-screen').style.display='none';
         document.getElementById('mofu-name-display').innerText = d.pn;
-        initPeer(); updateUI(); startWalking();
+        saveData(); updateUI(); startWalking();
     }
-    if(d.un) startGame();
+
+    window.onload = () => {
+        if(!d.un) { document.getElementById('start-screen').style.display='flex'; }
+        else { startGame(); }
+    };
 
     function updateUI() {
         document.getElementById('coin').innerText = d.cn;
@@ -133,71 +108,55 @@
         document.getElementById('b-food').style.width = d.food + "%";
         document.getElementById('b-clean').style.width = d.clean + "%";
         document.getElementById('b-sleep').style.width = d.sleep + "%";
-        
         document.getElementById('s-head').innerText = d.eq.head;
         document.getElementById('s-face').innerText = d.eq.face;
         document.getElementById('s-body').innerText = d.eq.body;
         document.getElementById('s-hand').innerText = d.eq.hand;
-        
         saveData(); updateLists();
     }
 
-    function updateLists() {
-        const sl = document.getElementById('shop-list'); sl.innerHTML="";
-        shopItems.forEach(i => {
-            const b = document.createElement('button'); b.className='btn';
-            b.innerHTML = `${i.n}<br>💰${i.p}`;
-            b.onclick = () => {
-                if(d.cn < i.p) return alert("お金が足りない！");
-                d.cn -= i.p;
-                if(i.t === "food" || i.t === "clean") { d[i.t] = Math.min(100, d[i.t]+i.v); say(i.n + "最高！"); }
-                else { d.items.push(i); alert(i.n + "を買った！ロッカーを見てね。"); }
-                updateUI();
-            };
-            sl.appendChild(b);
-        });
-
-        const ll = document.getElementById('locker-list'); ll.innerHTML="";
-        d.items.forEach((i, idx) => {
-            const b = document.createElement('button'); b.className='btn';
-            b.innerText = i.n;
-            b.onclick = () => { d.eq[i.t] = i.e; updateUI(); say("似合うかな？"); };
-            ll.appendChild(b);
-        });
-
-        const wl = document.getElementById('work-list'); wl.innerHTML="";
-        [{n:"🧹掃除", m:50, lv:1}, {n:"📦配達", m:150, lv:3}, {n:"🚀冒険", m:500, lv:10}].forEach(w => {
-            const b = document.createElement('button'); b.className='btn';
-            b.innerHTML = `${w.n}<br>💰${w.m} (Lv${w.lv})`;
-            if(d.lvl < w.lv) b.disabled = true;
-            b.onclick = () => { d.cn += w.m; d.hp -= 20; d.exp += 20; checkLv(); updateUI(); say(w.n + "完了！"); closeSheet(); };
-            wl.appendChild(b);
-        });
-
-        const cl = document.getElementById('care-list'); cl.innerHTML="";
-        [{n:"🛌寝る", v:50}, {n:"🎾遊ぶ", v:10}].forEach(c => {
-            const b = document.createElement('button'); b.className='btn'; b.innerText=c.n;
-            b.onclick = () => { if(c.n==="🛌寝る") d.sleep=Math.min(100, d.sleep+50); else d.kizuna=Math.min(100, d.kizuna+10); updateUI(); closeSheet(); };
-            cl.appendChild(b);
-        });
+    function petMofu() { 
+        d.kizuna = Math.min(100, d.kizuna+1); d.exp += 2; 
+        say(d.un + "、だいすき！"); checkLv(); updateUI(); 
     }
 
-    function petMofu() { d.kizuna = Math.min(100, d.kizuna+1); d.exp += 2; say(d.un + "、だいすき！"); checkLv(); updateUI(); }
+    function say(t) { 
+        const s=document.getElementById('speech'); s.innerText=t; s.style.opacity=1; 
+        setTimeout(()=>s.style.opacity=0, 2000); 
+    }
+
     function checkLv() { if(d.exp >= d.lvl*50) { d.lvl++; d.exp=0; alert("レベルアップ！"); updateUI(); } }
-    function say(t) { const s=document.getElementById('speech'); s.innerText=t; s.style.opacity=1; setTimeout(()=>s.style.opacity=0, 2000); }
+    function resetGame() { if(confirm("最初からやり直す？")) { localStorage.clear(); location.reload(); } }
     function openSheet(id) { document.getElementById(id).classList.add('open'); document.getElementById('dark-fade').style.display='block'; }
     function closeSheet() { document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open')); document.getElementById('dark-fade').style.display='none'; }
-    function resetGame() { if(confirm("消す？")) { localStorage.clear(); location.reload(); } }
     function startWalking() { setInterval(() => { const c = document.getElementById('mofu-container'); c.style.left = Math.random()*(window.innerWidth-150)+'px'; c.style.top = Math.random()*(window.innerHeight-300)+100+'px'; }, 5000); }
 
-    function initPeer() {
-        const peer = new Peer();
-        peer.on('open', id => document.getElementById('my-id').innerText = id);
-        peer.on('connection', conn => { conn.on('data', data => alert("通信受信: " + data)); });
-    }
-    function connectToPeer() {
-        const id = document.getElementById('peer-id-input').value;
-        alert(id + "に接続中...（完成版ではここから対戦や交換ができるよ！）");
+    function updateLists() {
+        const sl = document.getElementById('shop-list'); sl.innerHTML="";
+        [{n:"🍎りんご",p:10,t:"food"},{n:"🧼石鹸",p:20,t:"clean"},{n:"👑王冠",p:500,t:"head",e:"👑"},{n:"🗡剣",p:1000,t:"hand",e:"🗡"}].forEach(i => {
+            const b = document.createElement('button'); b.className='btn'; b.innerHTML=`${i.n}<br>💰${i.p}`;
+            b.onclick = () => { if(d.cn>=i.p){ d.cn-=i.p; if(i.e){ d.items.push(i); }else{ d[i.t]=Math.min(100,d[i.t]+30); } updateUI(); } };
+            sl.appendChild(b);
+        });
+        const ll = document.getElementById('locker-list'); ll.innerHTML="";
+        d.items.forEach(i => {
+            const b = document.createElement('button'); b.className='btn'; b.innerText=i.n;
+            b.onclick = () => { d.eq[i.t] = i.e; updateUI(); };
+            ll.appendChild(b);
+        });
+        const wl = document.getElementById('work-list'); wl.innerHTML="";
+        [{n:"🧹掃除",m:50,lv:1},{n:"🚀冒険",m:500,lv:5}].forEach(w => {
+            const b = document.createElement('button'); b.className='btn'; b.innerHTML=`${w.n}(Lv${w.lv})`;
+            if(d.lvl < w.lv) b.disabled = true;
+            b.onclick = () => { d.cn+=w.m; d.exp+=20; updateUI(); closeSheet(); say("バイト完了！"); };
+            wl.appendChild(b);
+        });
+        const cl = document.getElementById('care-list'); cl.innerHTML="";
+        [{n:"🛌寝る"},{n:"🛀洗う"}].forEach(c => {
+            const b = document.createElement('button'); b.className='btn'; b.innerText=c.n;
+            b.onclick = () => { if(c.n==="🛌寝る")d.sleep=100; else d.clean=100; updateUI(); closeSheet(); };
+            cl.appendChild(b);
+        });
     }
 </script>
 </body>
